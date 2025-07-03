@@ -67,3 +67,5 @@ wage_dif_series <- wage_series |>
   pivot_wider(id_cols = year, names_from = union_stat, values_from = real_wage) |>
   mutate(diff = ((union-nonunion)/nonunion)) |>
   select(year, nonunion, union, diff)
+
+##test
