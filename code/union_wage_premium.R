@@ -5,11 +5,10 @@ library(epidatatools)
 library(labelled)
 library(realtalk)
 
-# Import CPS org data, load as many years necessary to get sufficient sample sizes or desired for time series.
-cps_org <- load_org(2020:2024, "year", "age", "statefips", "wage", "union", "lfstat", "orgwgt", "a_earnhour", "cow1") %>%
-  # Age and labor force restrictions, non-imputed wages.
-  filter(age >= 16, cow1 <= 5, a_earnhour != 1,
-    !is.na(wage))
+# Import CPS org data, load as many years necessary to get sufficient sample sizes or desired time series.
+cps_org <- load_org(2020:2024, "year", "age", "statefips", "wage", "union", "orgwgt", "a_earnhour", "cow1") %>%
+  # Age and labor force restrictions (exclude self-employed and self-incorporated), non-imputed wages.
+  filter(age >= 16, cow1 <= 5, a_earnhour != 1, !is.na(wage))
 
 ## Method 1: For point-in-time comparisons or for states that have small sample sizes and require pooling. ##
 
@@ -34,7 +33,7 @@ wage_dif_single <- wage_single |>
 mutate(state = to_factor(statefips)) |>
 select(statefips, state, everything())
 
-## Method 2: For inflation-adjusted time series (note: use only with sufficient sample sizes). ##
+## Method 2: For inflation-adjusted time series for a single state (note: use only with sufficient sample sizes). ##
 
 # Calculate real wage over time: load CPI data from realtalk
 cpi_data <- realtalk::c_cpi_u_annual
@@ -43,7 +42,7 @@ cpi_data <- realtalk::c_cpi_u_annual
 cpi2024 <- cpi_data$c_cpi_u[cpi_data$year==2024]
 
 # Create a dataframe with wage information by year.
-# Note: change statefips to whatever state you prefer.
+# Note: change statefips to whichever state you prefer.
 wage_series <- cps_org |>
   filter(statefips == 36) |>
   mutate(union = to_factor(union)) |>
